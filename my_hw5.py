@@ -21,6 +21,50 @@ def policy_iteration(mdp, gamma=1, iters=5, plot=True):
     Ustart = []
 
     #TODO Implement policy iteration
+    # 1.1
+    # U = R + gamma*PU
+    # (I-gamma*P)U = R
+    # A = I -gamma*P     b = R     x = U
+    trans_matrix = np.zeros(shape=((mdp.num_states+1), (mdp.num_states+1)))
+
+    reward_matrix = np.zeros(mdp.num_states +1)
+    for x in range(mdp.num_states + 1):
+        reward_matrix[x] = mdp.R(x)
+
+    # run the policy going up in every state
+    print(mdp.num_states)
+    for x in range((mdp.num_states+1)):
+        transitions = mdp.P_snexts(x, 0)
+        # set the transition probabilities with initial policy of moving up
+        for k, v in transitions.items():
+            trans_matrix[x, k] = v
+    identity = np.eye((mdp.num_states+1))
+    discounted = gamma * trans_matrix
+    A = identity - discounted
+
+
+    print(identity)
+    print(discounted)
+    print(A)
+
+    pseudo_inverse = np.linalg.pinv(A)
+    print(pseudo_inverse)
+    new_utility = np.dot(pseudo_inverse, reward_matrix)
+    print()
+    print(new_utility)
+
+    # for k, v in d.iteritems(): newArray[theArray == k] = v
+
+    # print(mdp.loc2state)
+    # print(mdp.state2loc)
+    # print(mdp.S())
+    # print(mdp.A(1))
+    # print(mdp.R(1))
+    # print(mdp.P(2, 1, 3))
+    # print(mdp.P(2, 1, 0))
+    # print(mdp.P(2, 1, 1))
+    # print(mdp.P_snexts(9, 0))
+    # print(trans_matrix)
 
     if plot:
         fig = plt.figure()
@@ -212,5 +256,5 @@ if __name__ == '__main__':
     mdp = GridWorld_MDP()
 
     U, pi, Ustart = policy_iteration(mdp, plot=True)
-    vret, vest, v = td_learning(env, pi, gamma=1., alpha=0.1, episodes=2000, plot=True)
-    qret, qest, q = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
+    # vret, vest, v = td_learning(env, pi, gamma=1., alpha=0.1, episodes=2000, plot=True)
+    # qret, qest, q = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
