@@ -25,6 +25,8 @@ def policy_iteration(mdp, gamma=1, iters=5, plot=True):
     # U = R + gamma*PU
     # (I-gamma*P)U = R
     # A = I -gamma*P     b = R     x = U
+
+    # use trans_matrix with the applied max action (policy) for that iteration
     trans_matrix = np.zeros(shape=((mdp.num_states+1), (mdp.num_states+1)))
 
     reward_matrix = np.zeros(mdp.num_states +1)
@@ -42,7 +44,6 @@ def policy_iteration(mdp, gamma=1, iters=5, plot=True):
     discounted = gamma * trans_matrix
     A = identity - discounted
 
-
     print(identity)
     print(discounted)
     print(A)
@@ -50,21 +51,48 @@ def policy_iteration(mdp, gamma=1, iters=5, plot=True):
     pseudo_inverse = np.linalg.pinv(A)
     print(pseudo_inverse)
     new_utility = np.dot(pseudo_inverse, reward_matrix)
-    print()
-    print(new_utility)
 
-    # for k, v in d.iteritems(): newArray[theArray == k] = v
 
-    # print(mdp.loc2state)
-    # print(mdp.state2loc)
-    # print(mdp.S())
-    # print(mdp.A(1))
-    # print(mdp.R(1))
-    # print(mdp.P(2, 1, 3))
-    # print(mdp.P(2, 1, 0))
-    # print(mdp.P(2, 1, 1))
-    # print(mdp.P_snexts(9, 0))
+
+
+    # get the new policy
+    new_policy = np.zeros(mdp.num_states + 1)
+    for state in range(mdp.num_states + 1):
+        utility_dict = {}
+        # determine utility for each action
+        for x in range(4):
+            transitions = mdp.P_snexts(state, x)
+            # find the total utility from the transition
+            total = 0
+            for k, v in transitions.items():
+                total += new_utility[k]*v
+            utility_dict[x] = total
+        # select the maximum utiilty
+        max_action = max(utility_dict, key =utility_dict.get)
+        new_policy[state] = max_action
+    print(new_policy)
+
+
+
+
+
+
+
+    # print()
+    # print(new_utility)
+    #
+    #
     # print(trans_matrix)
+    # print_matrix_to_latex(trans_matrix)
+    # print_matrix_to_latex(identity)
+    # print_matrix_to_latex(A)
+    # print_matrix_to_latex(pseudo_inverse)
+    # for x in new_utility:
+    #     fixed = '{0:.5f}'.format(x)
+    #     print(str(fixed) + " \\\\")
+
+
+
 
     if plot:
         fig = plt.figure()
@@ -82,6 +110,16 @@ def policy_iteration(mdp, gamma=1, iters=5, plot=True):
     #U and pi should be returned with the shapes and types specified
     return U, pi, np.array(Ustart)
 
+def print_matrix_to_latex(matrix):
+    matrix_latex = "$\\begin{bmatrix} \n"
+    for x in matrix:
+        for y in x:
+            # fixed = '{0:.3f}'.format(y)
+            fixed = y
+            matrix_latex += str(fixed) + " & "
+        matrix_latex += "\\\\ \n"
+    matrix_latex += "\end{bmatrix} $"
+    print(matrix_latex)
 
 def td_update(v, s1, r, s2, terminal, alpha, gamma):
     '''
@@ -255,6 +293,10 @@ if __name__ == '__main__':
     env = GridWorld()
     mdp = GridWorld_MDP()
 
-    U, pi, Ustart = policy_iteration(mdp, plot=True)
+    # THIS IS THEIRS
+    # U, pi, Ustart = policy_iteration(mdp, plot=True)
+
+
+    U, pi, Ustart = policy_iteration(mdp, plot=False)
     # vret, vest, v = td_learning(env, pi, gamma=1., alpha=0.1, episodes=2000, plot=True)
     # qret, qest, q = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
