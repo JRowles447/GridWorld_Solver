@@ -27,45 +27,53 @@ def policy_iteration(mdp, gamma=1, iters=5, plot=True):
     for x in range(mdp.num_states):
         reward_matrix[x] = mdp.R(x)
 
-    # Create empty transition matrix
-    trans_matrix = np.zeros(shape=(mdp.num_states, mdp.num_states))
-    # Initialize transition matrix using policy vector pi
-    for x in range(mdp.num_states):
-        # If state is terminal, automatically passes into the absorbing state
-        if(mdp.is_terminal(x)):
-            pass
-        else:
-            transitions = mdp.P_snexts(x, pi[x])
-            # set transition probabilities
-            for k, v in transitions.items():
-                trans_matrix[x, k] = v
+    i = 0
+    while i < iters:
+        # Append utility of start state to Ustart
+        Ustart.append(U[mdp.loc2state[mdp.start]])
 
-    identity = np.eye(mdp.num_states)
-    discounted = gamma * trans_matrix
-    A = identity - discounted
-    # calculate new utility
-    pseudo_inverse = np.linalg.pinv(A)
-    new_utility = np.dot(pseudo_inverse, reward_matrix)
-
-    new_policy = np.zeros(mdp.num_states)
-    for state in range(mdp.num_states):
-        if(mdp.is_terminal(state)):
-            pass
-        else:
-            utility_dict = {}
-            # determine utility for each action available for state
-            for x in mdp.A(state):
-                transitions = mdp.P_snexts(state, x)
-                # find the total utility from the transition
-                total = 0
+        # Create empty transition matrix
+        trans_matrix = np.zeros(shape=(mdp.num_states, mdp.num_states))
+        # Initialize transition matrix using policy vector pi
+        for x in range(mdp.num_states):
+            # If state is terminal, automatically passes into the absorbing state
+            if(mdp.is_terminal(x)):
+                pass
+            else:
+                transitions = mdp.P_snexts(x, pi[x])
+                # set transition probabilities
                 for k, v in transitions.items():
-                    total += new_utility[k] * v
-                utility_dict[x] = total
-            # select the maximum utiilty
-            max_action = max(utility_dict, key=utility_dict.get)
-            new_policy[state] = max_action
-    print(new_policy)
+                    trans_matrix[x, k] = v
 
+        identity = np.eye(mdp.num_states)
+        discounted = gamma * trans_matrix
+        A = identity - discounted
+        # calculate new utility
+        pseudo_inverse = np.linalg.pinv(A)
+        U = np.dot(pseudo_inverse, reward_matrix)
+
+        old_pi = pi
+        old_U = U
+        for state in range(mdp.num_states):
+            if(mdp.is_terminal(state)):
+                pass
+            else:
+                utility_dict = {}
+                # determine utility for each action available for state
+                for x in mdp.A(state):
+                    transitions = mdp.P_snexts(state, x)
+                    # find the total utility from the transition
+                    total = 0
+                    for k, v in transitions.items():
+                        total += U[k] * v
+                    utility_dict[x] = total
+                # select the maximum utility
+                max_action = max(utility_dict, key=utility_dict.get)
+                pi[state] = max_action
+        i += 1
+        # print("\nIteration " + str(i) + ": ")
+        # print(U)
+    # print(U)
     # END IMPLEMENTATION
 
 
