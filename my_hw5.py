@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
 
-def policy_iteration(mdp, gamma=1, iters=5, plot=True):
+def policy_iteration(mdp, gamma=1, iters=100, plot=True):
     '''
     Performs policy iteration on an mdp and returns the value function and policy 
     :param mdp: mdp class (GridWorld_MDP) 
@@ -76,7 +76,18 @@ def policy_iteration(mdp, gamma=1, iters=5, plot=True):
     # print(U)
     # END IMPLEMENTATION
 
+    # print(Ustart)
 
+    # for 1.2 U* and pi* tables
+    j = 0
+    for x in U:
+        fixed = '{0:.5f}'.format(x)
+        print(str(j) + " & " + str(fixed) + " \\\\ \\hline")
+        j +=1
+    print()
+    for x in pi:
+        fixed = '{0:.5f}'.format(x)
+        print(str(fixed) + " \\\\")
 
     # print()
     # print(new_utility)
@@ -297,6 +308,6 @@ if __name__ == '__main__':
     # U, pi, Ustart = policy_iteration(mdp, plot=True)
 
 
-    U, pi, Ustart = policy_iteration(mdp, plot=False)
+    U, pi, Ustart = policy_iteration(mdp, plot=True)
     # vret, vest, v = td_learning(env, pi, gamma=1., alpha=0.1, episodes=2000, plot=True)
     # qret, qest, q = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
