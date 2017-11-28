@@ -2,6 +2,7 @@ from gridworld import GridWorld, GridWorld_MDP
 import numpy as np
 import matplotlib.pyplot as plt
 import random
+import math
 from matplotlib.backends.backend_pdf import PdfPages
 
 
@@ -183,9 +184,9 @@ def td_episode(env, pi, v, gamma, alpha, max_steps=1000):
     # the value function estimate should be before any learn takes place in this episode
 
 
-    i = 0
+    i = 1
     # continue the episode until the max_steps have been complete, or if the episode is in absorbing state
-    while(i < max_steps and not env.is_absorbing()):
+    while(i <= max_steps and not env.is_absorbing()):
         # get the initial value if this is the first step in the episode
         if(i == 0):
             # get the start state for v0
@@ -196,7 +197,7 @@ def td_episode(env, pi, v, gamma, alpha, max_steps=1000):
 
         #TODO discount here?
         # take the action specified in policy (do we have to discount it here?)
-        r = env.Act(pi[env.get_state()])
+        r = math.pow(gamma, i)*env.Act(pi[env.get_state()])
         s2 = env.get_state()
         # print("Go from: " + str(s1) + " to: " + str(s2) + " with reward: " + str(r))
         # add to discounted rewards
@@ -333,9 +334,9 @@ def q_episode(env, q, eps, gamma, alpha, max_steps=1000):
     # Return G the discounted sum of rewards and q0 the estimate of G from the initial state
 
 
-    i = 0
+    i = 1
     # continue the episode until the max_steps have been complete, or if the episode is in absorbing state
-    while (i < max_steps and not env.is_absorbing()):
+    while (i <= max_steps and not env.is_absorbing()):
         # get the initial value if this is the first step in the episode
         if (i == 0):
             # get the start state for q and the max action
@@ -353,7 +354,7 @@ def q_episode(env, q, eps, gamma, alpha, max_steps=1000):
 
         # TODO discount here?
         # take the action returned by egreedy (optimal or rand) (do we have to discount it here?)
-        r = env.Act(a)
+        r = math.pow(gamma, i) * env.Act(a)
         s2 = env.get_state()
         # print("Go from: " + str(s1) + " to: " + str(s2) + " with action: " + str(a) + " with reward: " + str(r))
         # add to discounted rewards
@@ -421,13 +422,16 @@ if __name__ == '__main__':
     env = GridWorld()
     mdp = GridWorld_MDP()
 
-    # THIS IS THEIRS
-    # U, pi, Ustart = policy_iteration(mdp, plot=True)
-
 
     U, pi, Ustart = policy_iteration(mdp, plot=True)
     vret, vest, v = td_learning(env, pi, gamma=1., alpha=0.1, episodes=2000, plot=True)
     qret, qest, q = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
+
+    print(U)
+    print()
+    print(v)
+    print()
+    print(q)
 
 
     # run a few times and take the average:
