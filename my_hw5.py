@@ -79,15 +79,15 @@ def policy_iteration(mdp, gamma=1, iters=100, plot=True):
     # print(Ustart)
 
     # for 1.2 U* and pi* tables
-    j = 0
-    for x in U:
-        fixed = '{0:.5f}'.format(x)
-        print(str(j) + " & " + str(fixed) + " \\\\ \\hline")
-        j +=1
-    print()
-    for x in pi:
-        fixed = '{0:.5f}'.format(x)
-        print(str(fixed) + " \\\\")
+    # j = 0
+    # for x in U:
+    #     fixed = '{0:.5f}'.format(x)
+    #     print(str(j) + " & " + str(fixed) + " \\\\ \\hline")
+    #     j +=1
+    # print()
+    # for x in pi:
+    #     fixed = '{0:.5f}'.format(x)
+    #     print(str(fixed) + " \\\\")
 
     # print()
     # print(new_utility)
@@ -132,6 +132,7 @@ def print_matrix_to_latex(matrix):
     matrix_latex += "\end{bmatrix} $"
     print(matrix_latex)
 
+#TODO fix the discount
 def td_update(v, s1, r, s2, terminal, alpha, gamma):
     '''
     Performs the TD update on the value function v for one transition (s,a,r,s').
@@ -147,9 +148,15 @@ def td_update(v, s1, r, s2, terminal, alpha, gamma):
     '''
     #TODO implement the TD Update
     #you should update the value function v inplace (does not need to be returned)
-    pass
 
+    # use the td learning update formula
+    if not terminal:
+        v[s1] = v[s1] + alpha*(r + gamma*v[s2]-v[s1])
+    # TODO how to update at terminal? alpha or do we use gamma for discounting
+    else:
+        v[s1] += alpha*(r - v[s1])
 
+#TODO fix the discount
 def td_episode(env, pi, v, gamma, alpha, max_steps=1000):
     '''
     Agent interacts with the environment for one episode update the value function after
@@ -162,6 +169,8 @@ def td_episode(env, pi, v, gamma, alpha, max_steps=1000):
     :param max_steps: maximum number of steps in the episode
     :return: two floats G, v0 where G is the discounted return and v0 is the value function of the initial state (before learning)
     '''
+
+    # are the returns the guessed reward function? G is the last return at the end of the episode.
     G = 0.
     v0 = 0.
 
@@ -171,6 +180,28 @@ def td_episode(env, pi, v, gamma, alpha, max_steps=1000):
     # Learning should be done online (after every step)
     # return the discounted sum of rewards G, and the value function's estimate from the initial state v0
     # the value function estimate should be before any learn takes place in this episode
+
+
+    i = 0
+    # continue the episode until the max_steps have been complete, or if the episode is in absorbing state
+    while(i < max_steps and not mdp.is_absorbing(env.get_state())):
+        # get the initial value if this is the first step in the episode
+        if(i == 0):
+            # get the start state for v0
+            v0 = v[env.get_state()]
+        s1 = env.get_state()
+        term = env.is_terminal()
+
+
+        #TODO discount here?
+        # take the action specified in policy (do we have to discount it here?)
+        r = env.Act(pi[env.get_state()])
+        s2 = env.get_state()
+        # print("Go from: " + str(s1) + " to: " + str(s2) + " with reward: " + str(r))
+        # add to discounted rewards
+        G += r
+        td_update(v, s1, r, s2, term, alpha, gamma)
+        i+=1
 
     return G, v0
 
@@ -194,6 +225,14 @@ def td_learning(env, pi, gamma, alpha, episodes=200, plot=True):
     # return the list of returns, and list of estimates for all episodes
     # also return the value function v
 
+    i = 0
+    while i < episodes:
+        ret, est = td_episode(env, pi, v, gamma, alpha)
+        returns.append(ret)
+        estimates.append(est)
+        env.reset_to_start()
+        i+=1
+
     if plot:
         fig = plt.figure()
         plt.title("TD Learning with $\gamma={0}$ and $\\alpha={1}$".format(gamma, alpha))
@@ -208,6 +247,17 @@ def td_learning(env, pi, gamma, alpha, episodes=200, plot=True):
         pp.savefig(fig)
         plt.close()
         pp.close()
+
+    print("returns: " + str(returns))
+    print("\nestimates: " + str(estimates))
+    print("\nv: " + str(v))
+
+    j=0
+    for x in v:
+        fixed = '{0:.5f}'.format(x)
+        print(str(j) + " & " + str(fixed) + " \\\\ \\hline")
+        j +=1
+    print()
 
     return returns, estimates, v
 
@@ -309,5 +359,5 @@ if __name__ == '__main__':
 
 
     U, pi, Ustart = policy_iteration(mdp, plot=True)
-    # vret, vest, v = td_learning(env, pi, gamma=1., alpha=0.1, episodes=2000, plot=True)
+    vret, vest, v = td_learning(env, pi, gamma=1., alpha=0.1, episodes=2000, plot=True)
     # qret, qest, q = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
