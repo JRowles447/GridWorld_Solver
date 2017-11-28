@@ -448,6 +448,9 @@ if __name__ == '__main__':
     qret, qest, q3, testing3 = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
     qret, qest, q4, testing4 = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
 
+    for x in range(11):
+        sum = testing[x] + testing1[x] + testing2[x] + testing3[x] + testing4[x]
+        print(str(x) + " & " + '{0:.5f}'.format(sum/5) + " &    \\\\ \\hline")
     # get the policy, check which one is most often
     # avg each number
 
