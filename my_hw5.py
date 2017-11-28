@@ -23,14 +23,15 @@ def policy_iteration(mdp, gamma=1, iters=100, plot=True):
     Ustart = []
 
     #TODO Implement policy iteration
-    # BEGIN IMPLEMENTATION
-    # Create the reward matrix
-    reward_matrix = np.zeros(mdp.num_states)
-    for x in range(mdp.num_states):
-        reward_matrix[x] = mdp.R(x)
 
-    i = 0
-    while i < iters:
+    i = 1
+    while i <= iters:
+        # Create the reward matrix with discounting for that step
+        reward_matrix = np.zeros(mdp.num_states)
+        # get reward for each state and discount
+        for x in range(mdp.num_states):
+            reward_matrix[x] = math.pow(gamma, i) * mdp.R(x)
+
         # Append utility of start state to Ustart
         Ustart.append(U[mdp.loc2state[mdp.start]])
 
@@ -73,6 +74,8 @@ def policy_iteration(mdp, gamma=1, iters=100, plot=True):
                 max_action = max(utility_dict, key=utility_dict.get)
                 pi[state] = max_action
         i += 1
+
+
         # print("\nIteration " + str(i) + ": ")
         # print(U)
     # print(U)
@@ -103,7 +106,6 @@ def policy_iteration(mdp, gamma=1, iters=100, plot=True):
     # for x in new_utility:
     #     fixed = '{0:.5f}'.format(x)
     #     print(str(fixed) + " \\\\")
-
 
 
 
