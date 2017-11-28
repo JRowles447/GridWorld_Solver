@@ -1,6 +1,7 @@
 from gridworld import GridWorld, GridWorld_MDP
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 from matplotlib.backends.backend_pdf import PdfPages
 
 
@@ -269,10 +270,19 @@ def egreedy(q, s, eps):
     :param eps: the epsilon parameter to randomly select an action
     :return: an integer representing the action
     '''
-
     # TODO implement epsilon greedy action selection
 
-    return 0
+    rand = random.random()
+    # take a random action
+    if(rand < eps):
+        return np.random.randint(0,4)
+    # behave optimally
+    else:
+        action_utilities = {}
+        for x in range(4):
+            action_utilities[x] = q[s, x]
+        max_action = max(action_utilities, key=action_utilities.get)
+        return max_action
 
 def q_update(q, s1, a, r, s2, terminal, alpha, gamma):
     '''
