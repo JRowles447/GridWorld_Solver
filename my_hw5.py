@@ -249,16 +249,16 @@ def td_learning(env, pi, gamma, alpha, episodes=200, plot=True):
         plt.close()
         pp.close()
 
-    print("returns: " + str(returns))
-    print("\nestimates: " + str(estimates))
-    print("\nv: " + str(v))
+    # print("returns: " + str(returns))
+    # print("\nestimates: " + str(estimates))
+    # print("\nv: " + str(v))
 
-    j=0
-    for x in v:
-        fixed = '{0:.5f}'.format(x)
-        print(str(j) + " & " + str(fixed) + " \\\\ \\hline")
-        j +=1
-    print()
+    # j=0
+    # for x in v:
+    #     fixed = '{0:.5f}'.format(x)
+    #     print(str(j) + " & " + str(fixed) + " \\\\ \\hline")
+    #     j +=1
+    # print()
 
     return returns, estimates, v
 
@@ -410,22 +410,10 @@ def q_learning(env, eps, gamma, alpha, episodes=200, plot=True):
 
     # print(returns)
     # print(estimates)
-    print(q)
+    # print(q)
 
-    relevant_utilites = {}
-    relevant_utilites[0] = q[0, 3]
-    relevant_utilites[1] = q[1, 3]
-    relevant_utilites[2] = q[2, 3]
-    relevant_utilites[3] = q[3, 3]
-    relevant_utilites[4] = q[4, 0]
-    relevant_utilites[5] = q[5, 0]
-    relevant_utilites[6] = q[6, 3]
-    relevant_utilites[7] = q[7, 0]
-    relevant_utilites[8] = q[8, 2]
-    relevant_utilites[9] = q[9, 2]
-    relevant_utilites[10] = q[10, 2]
 
-    return returns, estimates, q, relevant_utilites
+    return returns, estimates, q
 
 
 
@@ -438,19 +426,19 @@ if __name__ == '__main__':
 
 
     U, pi, Ustart = policy_iteration(mdp, plot=True)
-    # vret, vest, v = td_learning(env, pi, gamma=1., alpha=0.1, episodes=2000, plot=True)
-    qret, qest, q, testing = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
+    vret, vest, v = td_learning(env, pi, gamma=1., alpha=0.1, episodes=2000, plot=True)
+    qret, qest, q = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
 
 
     # run a few times and take the average:
-    qret, qest, q1, testing1 = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
-    qret, qest, q2, testing2 = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
-    qret, qest, q3, testing3 = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
-    qret, qest, q4, testing4 = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
-
-    for x in range(11):
-        sum = testing[x] + testing1[x] + testing2[x] + testing3[x] + testing4[x]
-        print(str(x) + " & " + '{0:.5f}'.format(sum/5) + " &    \\\\ \\hline")
+    # qret, qest, q1, testing1 = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
+    # qret, qest, q2, testing2 = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
+    # qret, qest, q3, testing3 = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
+    # qret, qest, q4, testing4 = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
+    #
+    # for x in range(11):
+    #     sum = testing[x] + testing1[x] + testing2[x] + testing3[x] + testing4[x]
+    #     print(str(x) + " & " + '{0:.5f}'.format(sum/5) + " &    \\\\ \\hline")
     # get the policy, check which one is most often
     # avg each number
 
