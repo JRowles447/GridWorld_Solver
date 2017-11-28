@@ -185,7 +185,7 @@ def td_episode(env, pi, v, gamma, alpha, max_steps=1000):
 
     i = 0
     # continue the episode until the max_steps have been complete, or if the episode is in absorbing state
-    while(i < max_steps and not mdp.is_absorbing(env.get_state())):
+    while(i < max_steps and not env.is_absorbing()):
         # get the initial value if this is the first step in the episode
         if(i == 0):
             # get the start state for v0
@@ -301,7 +301,18 @@ def q_update(q, s1, a, r, s2, terminal, alpha, gamma):
 
     # TODO implement Q learning update rule
     # update should be done inplace (not returned)
-    pass
+    # TODO HOW TO DISCOUNT!!!!!!!!!!???????????????????
+
+    if not terminal:
+        next_action_utilities = {}
+        for x in range(4):
+            next_action_utilities[x] = q[s2, x]
+        max_action = max(next_action_utilities, key=next_action_utilities.get)
+        q[s1, a] = q[s1, a] + alpha*(r + gamma*q[s2, max_action] - q[s1, a])
+        # TODO how to update at terminal? alpha or do we use gamma for discounting
+    else:
+        q[s1, a] += alpha * (r - q[s1, a])
+
 
 def q_episode(env, q, eps, gamma, alpha, max_steps=1000):
     '''
@@ -319,9 +330,40 @@ def q_episode(env, q, eps, gamma, alpha, max_steps=1000):
     q0 = 0.
 
     # TODO implement agent interaction for q learning with epsilon greedy action selection
-    # Return G the discounted some of rewards and q0 the estimate of G from the initial state
+    # Return G the discounted sum of rewards and q0 the estimate of G from the initial state
+
+
+    i = 0
+    # continue the episode until the max_steps have been complete, or if the episode is in absorbing state
+    while (i < max_steps and not env.is_absorbing()):
+        # get the initial value if this is the first step in the episode
+        if (i == 0):
+            # get the start state for q and the max action
+            action_utilities = {}
+            for x in range(4):
+                action_utilities[x] = q[env.get_state(), x]
+            max_action = max(action_utilities, key=action_utilities.get)
+            q0 = q[env.get_state(), max_action]
+        s1 = env.get_state()
+        term = env.is_terminal()
+
+        #TODO figure out
+        # do we update in a or the actual result of our action? can we know what action we took, since it is non-deterministic?
+        a = egreedy(q, env.get_state(), eps)
+
+        # TODO discount here?
+        # take the action returned by egreedy (optimal or rand) (do we have to discount it here?)
+        r = env.Act(a)
+        s2 = env.get_state()
+        # print("Go from: " + str(s1) + " to: " + str(s2) + " with action: " + str(a) + " with reward: " + str(r))
+        # add to discounted rewards
+        G += r
+        q_update(q, s1, a, r, s2, term, alpha, gamma)
+        i += 1
 
     return G, q0
+
+    ## END TD_EP
 
 def q_learning(env, eps, gamma, alpha, episodes=200, plot=True):
     '''
@@ -341,6 +383,16 @@ def q_learning(env, eps, gamma, alpha, episodes=200, plot=True):
     # TODO implement Q learning over episodes
     # return the returns and estimates for each episode and the Q table
 
+
+    i = 0
+    while i < episodes:
+        # print(q)
+        ret, est = q_episode(env, q, eps, gamma, alpha)
+        returns.append(ret)
+        estimates.append(est)
+        env.reset_to_start()
+        i+=1
+
     if plot:
         fig = plt.figure()
         plt.title("Q Learning with $\gamma={0}$, $\epsilon={1}$, and $\\alpha={2}$".format(gamma, eps, alpha))
@@ -356,7 +408,24 @@ def q_learning(env, eps, gamma, alpha, episodes=200, plot=True):
         plt.close()
         pp.close()
 
-    return returns, estimates, q
+    # print(returns)
+    # print(estimates)
+    print(q)
+
+    relevant_utilites = {}
+    relevant_utilites[0] = q[0, 3]
+    relevant_utilites[1] = q[1, 3]
+    relevant_utilites[2] = q[2, 3]
+    relevant_utilites[3] = q[3, 3]
+    relevant_utilites[4] = q[4, 0]
+    relevant_utilites[5] = q[5, 0]
+    relevant_utilites[6] = q[6, 3]
+    relevant_utilites[7] = q[7, 0]
+    relevant_utilites[8] = q[8, 2]
+    relevant_utilites[9] = q[9, 2]
+    relevant_utilites[10] = q[10, 2]
+
+    return returns, estimates, q, relevant_utilites
 
 
 
@@ -369,5 +438,16 @@ if __name__ == '__main__':
 
 
     U, pi, Ustart = policy_iteration(mdp, plot=True)
-    vret, vest, v = td_learning(env, pi, gamma=1., alpha=0.1, episodes=2000, plot=True)
-    # qret, qest, q = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
+    # vret, vest, v = td_learning(env, pi, gamma=1., alpha=0.1, episodes=2000, plot=True)
+    qret, qest, q, testing = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
+
+
+    # run a few times and take the average:
+    qret, qest, q1, testing1 = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
+    qret, qest, q2, testing2 = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
+    qret, qest, q3, testing3 = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
+    qret, qest, q4, testing4 = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
+
+    # get the policy, check which one is most often
+    # avg each number
+
