@@ -76,7 +76,7 @@ def policy_iteration(mdp, gamma=1, iters=100, plot=True):
                 pi[state] = max_action
         i += 1
 
-    print(Ustart)
+    # print(Ustart)
         # print("\nIteration " + str(i) + ": ")
         # print(U)
     # print(U)
@@ -187,12 +187,12 @@ def td_episode(env, pi, v, gamma, alpha, max_steps=1000):
     # the value function estimate should be before any learn takes place in this episode
 
 
-    i = 1
+    i = 0
     # continue the episode until the max_steps have been complete, or if the episode is in absorbing state
-    while(i <= max_steps and not env.is_absorbing()):
+    while(i < max_steps and not env.is_absorbing()):
         # get the initial value if this is the first step in the episode
         if(i == 0):
-            # get the start state for v0
+            # get the start state for v0 TODO is this wrong, always producing zero?
             v0 = v[env.get_state()]
         s1 = env.get_state()
         term = env.is_terminal()
@@ -200,11 +200,11 @@ def td_episode(env, pi, v, gamma, alpha, max_steps=1000):
 
         #TODO discount here?
         # take the action specified in policy (do we have to discount it here?)
-        r = math.pow(gamma, i)*env.Act(pi[env.get_state()])
+        r = env.Act(pi[env.get_state()])
         s2 = env.get_state()
         # print("Go from: " + str(s1) + " to: " + str(s2) + " with reward: " + str(r))
         # add to discounted rewards
-        G += r
+        G += math.pow(gamma, i)*r
         td_update(v, s1, r, s2, term, alpha, gamma)
         i+=1
 
@@ -337,9 +337,9 @@ def q_episode(env, q, eps, gamma, alpha, max_steps=1000):
     # Return G the discounted sum of rewards and q0 the estimate of G from the initial state
 
 
-    i = 1
+    i = 0
     # continue the episode until the max_steps have been complete, or if the episode is in absorbing state
-    while (i <= max_steps and not env.is_absorbing()):
+    while (i < max_steps and not env.is_absorbing()):
         # get the initial value if this is the first step in the episode
         if (i == 0):
             # get the start state for q and the max action
@@ -357,11 +357,11 @@ def q_episode(env, q, eps, gamma, alpha, max_steps=1000):
 
         # TODO discount here?
         # take the action returned by egreedy (optimal or rand) (do we have to discount it here?)
-        r = math.pow(gamma, i) * env.Act(a)
+        r = env.Act(a)
         s2 = env.get_state()
         # print("Go from: " + str(s1) + " to: " + str(s2) + " with action: " + str(a) + " with reward: " + str(r))
         # add to discounted rewards
-        G += r
+        G += math.pow(gamma, i) * r
         q_update(q, s1, a, r, s2, term, alpha, gamma)
         i += 1
 
@@ -430,11 +430,11 @@ if __name__ == '__main__':
     vret, vest, v = td_learning(env, pi, gamma=1., alpha=0.1, episodes=2000, plot=True)
     qret, qest, q = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
 
-    print(U)
-    print()
-    print(v)
-    print()
-    print(q)
+    # print(U)
+    # print()
+    # print(v)
+    # print()
+    # print(q)
 
 
     # run a few times and take the average:
