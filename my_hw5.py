@@ -430,6 +430,7 @@ if __name__ == '__main__':
     vret, vest, v = td_learning(env, pi, gamma=1., alpha=0.1, episodes=2000, plot=True)
     qret, qest, q = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
 
+    print(qest)
     # print(U)
     # print()
     # print(v)
