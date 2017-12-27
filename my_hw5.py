@@ -76,40 +76,6 @@ def policy_iteration(mdp, gamma=1, iters=100, plot=True):
                 pi[state] = max_action
         i += 1
 
-    # print(Ustart)
-        # print("\nIteration " + str(i) + ": ")
-        # print(U)
-    # print(U)
-    # END IMPLEMENTATION
-
-    # print(Ustart)
-
-    # for 1.2 U* and pi* tables
-    # j = 0
-    # for x in U:
-    #     fixed = '{0:.5f}'.format(x)
-    #     print(str(j) + " & " + str(fixed) + " \\\\ \\hline")
-    #     j +=1
-    # print()
-    # for x in pi:
-    #     fixed = '{0:.5f}'.format(x)
-    #     print(str(fixed) + " \\\\")
-
-    # print()
-    # print(new_utility)
-    #
-    #
-    # print(trans_matrix)
-    # print_matrix_to_latex(trans_matrix)
-    # print_matrix_to_latex(identity)
-    # print_matrix_to_latex(A)
-    # print_matrix_to_latex(pseudo_inverse)
-    # for x in new_utility:
-    #     fixed = '{0:.5f}'.format(x)
-    #     print(str(fixed) + " \\\\")
-
-
-
     if plot:
         fig = plt.figure()
         plt.title("Policy Iteration with $\gamma={0}$".format(gamma))
@@ -130,7 +96,6 @@ def print_matrix_to_latex(matrix):
     matrix_latex = "$\\begin{bmatrix} \n"
     for x in matrix:
         for y in x:
-            # fixed = '{0:.3f}'.format(y)
             fixed = y
             matrix_latex += str(fixed) + " & "
         matrix_latex += "\\\\ \n"
@@ -152,16 +117,13 @@ def td_update(v, s1, r, s2, terminal, alpha, gamma):
     :return: Nothing
     '''
     #TODO implement the TD Update
-    #you should update the value function v inplace (does not need to be returned)
 
     # use the td learning update formula
     if not terminal:
         v[s1] = v[s1] + alpha*(r + gamma*v[s2]-v[s1])
-    # TODO how to update at terminal? alpha or do we use gamma for discounting
     else:
         v[s1] += alpha*(r - v[s1])
 
-#TODO fix the discount
 def td_episode(env, pi, v, gamma, alpha, max_steps=1000):
     '''
     Agent interacts with the environment for one episode update the value function after
@@ -186,7 +148,6 @@ def td_episode(env, pi, v, gamma, alpha, max_steps=1000):
     # return the discounted sum of rewards G, and the value function's estimate from the initial state v0
     # the value function estimate should be before any learn takes place in this episode
 
-
     i = 0
     # continue the episode until the max_steps have been complete, or if the episode is in absorbing state
     while(i < max_steps and not env.is_absorbing()):
@@ -197,12 +158,10 @@ def td_episode(env, pi, v, gamma, alpha, max_steps=1000):
         s1 = env.get_state()
         term = env.is_terminal()
 
-
-        #TODO discount here?
         # take the action specified in policy (do we have to discount it here?)
         r = env.Act(pi[env.get_state()])
         s2 = env.get_state()
-        # print("Go from: " + str(s1) + " to: " + str(s2) + " with reward: " + str(r))
+
         # add to discounted rewards
         G += math.pow(gamma, i)*r
         td_update(v, s1, r, s2, term, alpha, gamma)
@@ -252,18 +211,7 @@ def td_learning(env, pi, gamma, alpha, episodes=200, plot=True):
         pp.savefig(fig)
         plt.close()
         pp.close()
-
-    # print("returns: " + str(returns))
-    # print("\nestimates: " + str(estimates))
-    # print("\nv: " + str(v))
-
-    # j=0
-    # for x in v:
-    #     fixed = '{0:.5f}'.format(x)
-    #     print(str(j) + " & " + str(fixed) + " \\\\ \\hline")
-    #     j +=1
-    # print()
-
+        
     return returns, estimates, v
 
 def egreedy(q, s, eps):
@@ -305,7 +253,6 @@ def q_update(q, s1, a, r, s2, terminal, alpha, gamma):
 
     # TODO implement Q learning update rule
     # update should be done inplace (not returned)
-    # TODO HOW TO DISCOUNT!!!!!!!!!!???????????????????
 
     if not terminal:
         next_action_utilities = {}
@@ -313,7 +260,6 @@ def q_update(q, s1, a, r, s2, terminal, alpha, gamma):
             next_action_utilities[x] = q[s2, x]
         max_action = max(next_action_utilities, key=next_action_utilities.get)
         q[s1, a] = q[s1, a] + alpha*(r + gamma*q[s2, max_action] - q[s1, a])
-        # TODO how to update at terminal? alpha or do we use gamma for discounting
     else:
         q[s1, a] += alpha * (r - q[s1, a])
 
@@ -335,7 +281,6 @@ def q_episode(env, q, eps, gamma, alpha, max_steps=1000):
 
     # TODO implement agent interaction for q learning with epsilon greedy action selection
     # Return G the discounted sum of rewards and q0 the estimate of G from the initial state
-
 
     i = 0
     # continue the episode until the max_steps have been complete, or if the episode is in absorbing state
@@ -359,15 +304,13 @@ def q_episode(env, q, eps, gamma, alpha, max_steps=1000):
         # take the action returned by egreedy (optimal or rand) (do we have to discount it here?)
         r = env.Act(a)
         s2 = env.get_state()
-        # print("Go from: " + str(s1) + " to: " + str(s2) + " with action: " + str(a) + " with reward: " + str(r))
+
         # add to discounted rewards
         G += math.pow(gamma, i) * r
         q_update(q, s1, a, r, s2, term, alpha, gamma)
         i += 1
 
     return G, q0
-
-    ## END TD_EP
 
 def q_learning(env, eps, gamma, alpha, episodes=200, plot=True):
     '''
@@ -387,10 +330,8 @@ def q_learning(env, eps, gamma, alpha, episodes=200, plot=True):
     # TODO implement Q learning over episodes
     # return the returns and estimates for each episode and the Q table
 
-
     i = 0
     while i < episodes:
-        # print(q)
         ret, est = q_episode(env, q, eps, gamma, alpha)
         returns.append(ret)
         estimates.append(est)
@@ -412,11 +353,6 @@ def q_learning(env, eps, gamma, alpha, episodes=200, plot=True):
         plt.close()
         pp.close()
 
-    # print(returns)
-    # print(estimates)
-    # print(q)
-
-
     return returns, estimates, q
 
 
@@ -425,28 +361,13 @@ if __name__ == '__main__':
     env = GridWorld()
     mdp = GridWorld_MDP()
 
-
     U, pi, Ustart = policy_iteration(mdp, plot=True)
     vret, vest, v = td_learning(env, pi, gamma=1., alpha=0.1, episodes=2000, plot=True)
     qret, qest, q = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
 
-    print(qest)
-    # print(U)
-    # print()
-    # print(v)
-    # print()
-    # print(q)
-
-
-    # run a few times and take the average:
-    # qret, qest, q1, testing1 = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
-    # qret, qest, q2, testing2 = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
-    # qret, qest, q3, testing3 = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
-    # qret, qest, q4, testing4 = q_learning(env, eps=0.1, gamma=1., alpha=0.1, episodes=20000, plot=True)
-    #
-    # for x in range(11):
-    #     sum = testing[x] + testing1[x] + testing2[x] + testing3[x] + testing4[x]
-    #     print(str(x) + " & " + '{0:.5f}'.format(sum/5) + " &    \\\\ \\hline")
-    # get the policy, check which one is most often
-    # avg each number
-
+    print("Policy Iteration: ")
+    print(pi)
+    print("\nTD Learning: ")
+    print(v)
+    print("\nQ Learning: ")
+    print(q)
